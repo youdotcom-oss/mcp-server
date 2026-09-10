@@ -40,7 +40,8 @@
     "dev": "bun src/stdio-bridge.ts",
     "prepublishOnly": "bun run build",
     "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test:watch": "bun test --watch",
+    "prepare": "git config core.hooksPath .hooks"
   },
   "mcpName": "io.github.youdotcom-oss/mcp",
   "dependencies": {

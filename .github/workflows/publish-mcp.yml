@@ -102,6 +102,13 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Setup Node.js (for npm publish)
+        uses: actions/setup-node@v5
+        with:
+          node-version: "lts/*"
+          registry-url: https://registry.npmjs.org
+          check-latest: true
+
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}

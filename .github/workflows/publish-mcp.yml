@@ -50,6 +50,13 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
+      - name: Setup Node.js (for npm publish)
+        uses: actions/setup-node@v5
+        with:
+          node-version: "lts/*"
+          registry-url: https://registry.npmjs.org
+          check-latest: true
+
       - name: Install dependencies
         run: bun install
 
@@ -82,7 +89,7 @@ jobs:
             IS_PRERELEASE="true"
             VERSION="${base_version}-next.${INPUT_PRERELEASE}"
           elif [[ "$IS_PRERELEASE" == "true" ]]; then
-            PRERELEASE_NUM=$(jq -r '.version' package.json | grep -oE 'next\.[0-9]+$' | grep -oE '[0-9]+$' || echo "0")
+            PRERELEASE_NUM=$(npm view @youdotcom-oss/mcp versions --json 2>/dev/null | jq -r --arg base "${base_version}-next" '[.[] | select(startswith($base))] | last // "0"' | grep -oE '[0-9]+$' || echo "0")
             PRERELEASE_NUM=$((PRERELEASE_NUM + 1))
             VERSION="${base_version}-next.${PRERELEASE_NUM}"
           else
@@ -102,19 +109,17 @@ jobs:
       - name: Build
         run: bun run build
 
-      - name: Setup Node.js (for npm publish)
-        uses: actions/setup-node@v5
-        with:
-          node-version: "lts/*"
-          registry-url: https://registry.npmjs.org
-          check-latest: true
-
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           VERSION: ${{ steps.set_version.outputs.version }}
+          IS_PRERELEASE: ${{ steps.set_version.outputs.is_prerelease }}
         run: |
-          npm publish --provenance --access public
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            npm publish --provenance --access public --tag next
+          else
+            npm publish --provenance --access public
+          fi
 
       - name: Commit version bump
         env:

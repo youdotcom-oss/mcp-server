@@ -1,24 +1,60 @@
 {
-  "name": "dx-toolkit",
-  "description": "Open-source toolkit enabling developers to integrate You.com's AI capabilities into their workflows",
-  "private": true,
+  "name": "@youdotcom-oss/mcp",
+  "version": "3.5.0",
+  "description": "You.com MCP STDIO bridge for the hosted You.com MCP server",
+  "license": "MIT",
   "engines": {
     "node": ">=18",
     "bun": ">= 1.2.21"
   },
-  "workspaces": [
-    "packages/*",
-    "plugins/*",
-    "scripts/*"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youdotcom-oss/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/youdotcom-oss/mcp/issues"
+  },
+  "homepage": "https://github.com/youdotcom-oss/mcp#readme",
+  "author": "You.com (https://you.com)",
+  "keywords": [
+    "mcp",
+    "web search",
+    "model context protocol",
+    "ai research"
   ],
+  "bin": "bin/stdio.js",
+  "type": "module",
+  "files": [
+    "bin/stdio.js",
+    "server.json"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "bun run --filter '*' build",
-    "check": "bun run check:workspace-deps && bun run --filter '*' check",
-    "check:workspace-deps": "bash scripts/check-workspace-deps.sh",
-    "check:write": "bun run --filter '*' check:write",
-    "prepare": "git config core.hooksPath .hooks",
+    "build": "bun build ./src/stdio-bridge.ts --outfile ./bin/stdio.js --target=node",
+    "check": "bun run check:biome && bun run check:types",
+    "check:biome": "biome check",
+    "check:types": "tsc --noEmit",
+    "check:write": "biome check --write",
+    "dev": "bun src/stdio-bridge.ts",
+    "prepublishOnly": "bun run build",
     "test": "bun test",
-    "test:coverage": "bun test test:coverage"
+    "test:watch": "bun test --watch"
+  },
+  "mcpName": "io.github.youdotcom-oss/mcp",
+  "dependencies": {
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/server": "^2.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@types/bun": "latest",
+    "lint-staged": "^17.1.0",
+    "typescript": "7.0.2",
+    "zod": "^4.4.3"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -26,21 +62,7 @@
     ],
     "*.{json,md}": [
       "biome format --write --no-errors-on-unmatched"
-    ],
-    "package.json": [
-      "format-package --write"
     ]
   },
-  "devDependencies": {
-    "@biomejs/biome": "2.5.9",
-    "@commitlint/cli": "^21.2.1",
-    "@commitlint/config-conventional": "^21.2.0",
-    "@modelcontextprotocol/client": "^2.0.0",
-    "@types/bun": "latest",
-    "format-package": "^8.0.0",
-    "lint-staged": "^17.1.0",
-    "typescript": "7.0.2",
-    "typescript-language-server": "5.3.0",
-    "zod": "^4.4.3"
-  }
+  "prepare": "git config core.hooksPath .hooks"
 }

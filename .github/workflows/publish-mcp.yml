@@ -18,17 +18,121 @@ on:
 permissions:
   contents: write
   id-token: write
-  issues: write
 
 jobs:
   publish:
-    uses: ./.github/workflows/_publish-package.yml
-    secrets:
-      PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
-    with:
-      npm_package_name: "@youdotcom-oss/mcp"
-      bump: ${{ github.event.inputs.bump }}
-      prerelease: ${{ github.event.inputs.prerelease }}
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+      is_prerelease: ${{ steps.set_version.outputs.is_prerelease }}
+    steps:
+      - name: Validate inputs
+        env:
+          INPUT_BUMP: ${{ inputs.bump }}
+          INPUT_PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          if [[ "$INPUT_BUMP" != "patch" && "$INPUT_BUMP" != "minor" && "$INPUT_BUMP" != "major" ]]; then
+            echo "::error::Invalid bump type: $INPUT_BUMP"
+            exit 1
+          fi
+
+          if [[ -n "$INPUT_PRERELEASE" ]] && ! echo "$INPUT_PRERELEASE" | grep -qE '^[0-9]+$'; then
+            echo "::error::Invalid prerelease value: $INPUT_PRERELEASE"
+            exit 1
+          fi
+
+          echo "✓ Input validation passed"
+
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.PUBLISH_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Compute version
+        id: set_version
+        env:
+          INPUT_BUMP: ${{ inputs.bump }}
+          INPUT_PRERELEASE: ${{ inputs.prerelease }}
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          CURRENT=$(jq -r '.version' package.json)
+          echo "Current version: $CURRENT"
+
+          BASE=$(echo "$CURRENT" | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+')
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$BASE"
+
+          case "$INPUT_BUMP" in
+            major) base_version="$((MAJOR + 1)).0.0" ;;
+            minor) base_version="${MAJOR}.$((MINOR + 1)).0" ;;
+            patch) base_version="${MAJOR}.${MINOR}.$((PATCH + 1))" ;;
+          esac
+
+          if [[ "$BRANCH_NAME" != "main" ]]; then
+            IS_PRERELEASE="true"
+          else
+            IS_PRERELEASE="false"
+          fi
+
+          if [[ -n "$INPUT_PRERELEASE" ]]; then
+            IS_PRERELEASE="true"
+            VERSION="${base_version}-next.${INPUT_PRERELEASE}"
+          elif [[ "$IS_PRERELEASE" == "true" ]]; then
+            PRERELEASE_NUM=$(jq -r '.version' package.json | grep -oE 'next\.[0-9]+$' | grep -oE '[0-9]+$' || echo "0")
+            PRERELEASE_NUM=$((PRERELEASE_NUM + 1))
+            VERSION="${base_version}-next.${PRERELEASE_NUM}"
+          else
+            VERSION="$base_version"
+          fi
+
+          echo "Publishing version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "is_prerelease=$IS_PRERELEASE" >> $GITHUB_OUTPUT
+
+      - name: Update package.json version
+        env:
+          VERSION: ${{ steps.set_version.outputs.version }}
+        run: |
+          jq --arg v "$VERSION" '.version = $v' package.json > package.tmp && mv package.tmp package.json
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          VERSION: ${{ steps.set_version.outputs.version }}
+        run: |
+          npm publish --provenance --access public
+
+      - name: Commit version bump
+        env:
+          VERSION: ${{ steps.set_version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json bun.lock
+          git commit -m "chore: publish v${VERSION} [skip ci]"
+          git push
+
+      - name: Create GitHub release
+        env:
+          VERSION: ${{ steps.set_version.outputs.version }}
+          GH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
+          IS_PRERELEASE: ${{ steps.set_version.outputs.is_prerelease }}
+        run: |
+          TAG="mcp@v${VERSION}"
+          TITLE="mcp v${VERSION}"
+
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            gh release create "${TAG}" --title "${TITLE}" --generate-notes --prerelease
+          else
+            gh release create "${TAG}" --title "${TITLE}" --generate-notes
+          fi
 
   publish-to-official-registry:
     if: needs.publish.outputs.is_prerelease == 'false'
@@ -48,8 +152,6 @@ jobs:
         env:
           VERSION: ${{ needs.publish.outputs.version }}
         run: |
-          cd packages/mcp
-          # Update both the top-level version and the packages[0].version
           jq --arg v "$VERSION" '.version = $v | .packages[0].version = $v' server.json > server.tmp && mv server.tmp server.json
           echo "✅ Updated server.json versions to $VERSION"
           echo "Top-level version: $(jq -r '.version' server.json)"
@@ -61,14 +163,10 @@ jobs:
           sudo mv mcp-publisher /usr/local/bin/
 
       - name: Authenticate with MCP Registry
-        run: |
-          cd packages/mcp
-          mcp-publisher login github-oidc
+        run: mcp-publisher login github-oidc
 
       - name: Publish to MCP Registry
-        run: |
-          cd packages/mcp
-          mcp-publisher publish
+        run: mcp-publisher publish
 
       - name: Commit and push server.json version update
         env:
@@ -76,7 +174,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add packages/mcp/server.json
+          git add server.json
           git commit -m "chore(mcp): update server.json to version ${VERSION} [skip ci]
 
           Automated version sync for Anthropic MCP Registry publishing.

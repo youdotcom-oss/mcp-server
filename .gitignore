@@ -5,17 +5,12 @@ yarn.lock
 pnpm-lock.yaml
 **/node_modules/
 **/.pnpm-store/
-packages/*/bun.lock
-packages/*/package-lock.json
-packages/*/yarn.lock
-packages/*/pnpm-lock.yaml
 
 # Build outputs
 **/dist/*
 **/build/*
 *.tsbuildinfo
 **/bin/*
-
 
 # Environment variables
 .env*
@@ -50,12 +45,12 @@ Thumbs.db
 *.log
 loglevel.json
 
-# Coverage (workspace-level reports)
+# Coverage
 **/coverage/
 *.lcov
 **/.nyc_output/
 
-# Test artifacts (workspace-level)
+# Test artifacts
 test-results/
 test-output/
 results.json
@@ -65,7 +60,6 @@ tmp/
 temp/
 .tmp/
 *.bak
-
 
 # Cache directories
 **/.cache/
@@ -77,28 +71,8 @@ temp/
 *.seed
 *.pid.lock
 
-# Cache directories
-.cache/
-.parcel-cache/
-.eslintcache
-
-# Optional npm cache directory
-.npm
-.npmrc
-
-# Optional REPL history
-.node_repl_history
-
 # Output of 'npm pack'
 *.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# API keys and secrets (extra safety)
-*.key
-secrets.json
-config/secrets.json
 
 # TypeScript cache
 *.tsbuildinfo
@@ -112,5 +86,5 @@ config/secrets.json
 .factory/droids/
 .factory/cache/
 
-packages/*/.mcpregistry_registry_token
-packages/*/.mcpregistry_github_token
+.mcpregistry_registry_token
+.mcpregistry_github_token

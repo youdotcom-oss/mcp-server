@@ -1,15 +1,12 @@
 ---
-description: Lean maintainer guide for the You.com DX Toolkit monorepo.
+description: Maintainer guide for @youdotcom-oss/mcp.
 globs: "*.ts, *.tsx, *.js, *.jsx, package.json, AGENTS.md"
 alwaysApply: false
 ---
 
-# You.com DX Toolkit
+# @youdotcom-oss/mcp
 
-Bun workspace for You.com developer packages and integrations.
-
-Prefer the root [README.md](./README.md) for user-facing setup. This file is
-for maintainers and coding agents working inside the repo.
+You.com MCP STDIO bridge for the hosted You.com MCP server.
 
 ---
 
@@ -45,41 +42,6 @@ say why. Before trusting repo docs, verify the current state with `rg`, `find`,
 
 ---
 
-## Repo Shape
-
-### Core Paths
-
-| Path | Purpose |
-|------|---------|
-| `.agents/skills/` | Canonical skill directory for this repo |
-| `packages/` | Publishable packages |
-| `.github/workflows/` | CI, review, publish, and security workflows |
-| `scripts/` | Repo utilities and validation scripts |
-| `docs/` | Supporting docs such as performance notes |
-
-### Current Packages
-
-- `packages/cli`
-- `packages/mcp`
-- `packages/ai-sdk-plugin`
-- `packages/langchain`
-
-### Skill Surface
-
-Prefer `.agents/skills/` as the canonical agent workflow surface. Current
-shared skills:
-
-- `grill-me` for stress-testing plans or designs
-- `optimize-agents-md` for tightening repo instructions
-- `review-guidelines` for code review conventions
-- `tdd` for behavior-changing feature and fix work
-- `typescript-lsp` for type-aware TypeScript symbol exploration
-
-If legacy `.claude/skills/` content exists, do not treat it as the primary
-source of truth unless the task explicitly depends on it.
-
----
-
 ## Commands
 
 ### Setup
@@ -90,67 +52,44 @@ cp .env.example .env
 source .env
 ```
 
-`.env` commonly needs `YDC_API_KEY`.
-
-### Workspace Commands
+### Development
 
 ```bash
 bun run build
 bun run check
 bun run check:write
 bun test
+bun run test:watch
+bun run dev
 ```
 
-`bun run check` includes workspace dependency validation plus per-package
-checks.
-
-### Package Commands
-
-Always run package commands from the repo root with `bun --cwd`. Never `cd`
-into a package directory for local development commands.
-
-```bash
-bun --cwd packages/mcp test
-bun --cwd packages/mcp check
-bun --cwd packages/cli test
-bun --cwd packages/cli check
-bun --cwd packages/ai-sdk-plugin build
-bun --cwd packages/langchain test
-```
+`bun run check` runs Biome lint/format and TypeScript type-checking.
 
 ---
 
-## Working Rules
+## Code Rules
 
-### Package and Dependency Rules
-
-- Package directory names must match the npm package suffix after
-  `@youdotcom-oss/`.
-- Internal workspace dependencies must use exact versions, not `workspace:*`,
-  `^`, or `~`.
-- The reusable publish workflow derives the package directory from the npm
-  package name. Mismatches break releases.
-
-### Code Rules
-
-- Use relative imports inside a package.
+- Use relative imports.
 - Use explicit `.ts` extensions on local imports.
 - Keep public APIs documented with TSDoc.
 - Prefer Bun-native APIs and Bun-first commands where practical.
+- Use `type` over `interface` for type definitions.
+- Use arrow functions (`const fn = () =>`) over function declarations.
+- No `any` types — use `unknown` with type guards.
+- Object params when >2 args.
 
-### Git and GitHub Rules
+---
+
+## Git and GitHub Rules
 
 - Use conventional commits.
 - Use `gh` for PRs, issues, comments, and release inspection.
-- When given a GitHub PR or issue URL for this repo, inspect it with `gh`
-  rather than treating the URL as documentation.
 
 Useful commands:
 
 ```bash
 gh pr view <number>
 gh pr diff <number>
-gh api /repos/youdotcom-oss/dx-toolkit/pulls/<number>/comments
 gh issue view <number>
 ```
 
@@ -160,43 +99,21 @@ gh issue view <number>
 
 ### Key Workflows
 
-- `ci.yml` builds packages, runs checks, and runs tests with CI secrets
+- `ci.yml` builds, checks, and tests on push/PR to main
+- `publish-mcp.yml` publishes to npm with provenance, creates a GitHub release, and publishes to the MCP registry
 - `droid-review.yml` handles automated PR review
 - `semgrep-ci.yml` runs security scanning
-- `publish-*.yml` workflows publish individual packages through
-  `_publish-package.yml`
 
 ### Publishing Rules
 
-- Package releases are triggered through package-specific workflows such as
-  `publish-cli.yml` or `publish-mcp.yml`.
-- `_publish-package.yml` computes the next version, updates the target
-  `package.json`, updates dependent workspace packages, publishes to npm, and
-  creates a GitHub release tag in the form `{package}@v{version}`.
+- Package releases are triggered through `publish-mcp.yml` workflow dispatch.
+- The workflow computes the next version, updates `package.json`, publishes to npm, and creates a GitHub release tag in the form `mcp@v{version}`.
 - Non-`main` branches automatically publish prereleases as `x.y.z-next.N`.
-- `publish-mcp.yml` has extra steps for the hosted MCP surface:
-  remote version update, production deploy trigger for stable releases, and
-  `packages/mcp/server.json` registry publishing.
+- Stable releases also publish `server.json` to the official MCP registry.
 
 ---
 
-## Validation
+## Skills
 
-Use the smallest validation set that proves the change:
-
-- Docs or agent-instruction changes: `git diff --check` and stale-reference
-  searches with `rg`
-- Package-local code changes: targeted `bun --cwd packages/<name> ...`
-- Cross-package or dependency changes: `bun run check` and `bun test`
-
-Do not claim a workflow, package, or command exists without verifying it in the
-repo first.
-
----
-
-## Learnings
-
-- 2026-02-23: Run package commands from the repo root with
-  `bun --cwd packages/<name> ...`; do not `cd` into package directories for
-  local development commands.
-- 2026-02-23: Source `.env` before tests when they need `YDC_API_KEY`.
+- `tdd` for behavior-changing feature and fix work
+- `review-guidelines` for code review conventions

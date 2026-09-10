@@ -24,8 +24,8 @@ This project adheres to professional open-source standards. Be respectful, const
 ### Quick Setup
 
 ```bash
-git clone https://github.com/youdotcom-oss/youdotcom-mcp-server.git
-cd youdotcom-mcp-server
+git clone https://github.com/youdotcom-oss/youdotcom-oss/mcp.git
+cd youdotcom-oss/mcp
 bun install
 echo "export YDC_API_KEY=your-key" > .env
 source .env
@@ -38,7 +38,7 @@ For detailed development setup, code patterns, and architecture, see [AGENTS.md]
 
 ### Reporting Bugs
 
-**Before submitting**: Check [existing issues](https://github.com/youdotcom-oss/youdotcom-mcp-server/issues)
+**Before submitting**: Check [existing issues](https://github.com/youdotcom-oss/youdotcom-oss/mcp/issues)
 
 **When reporting**, include:
 
@@ -50,7 +50,7 @@ For detailed development setup, code patterns, and architecture, see [AGENTS.md]
 
 **Where to report**:
 
-- GitHub Issues: https://github.com/youdotcom-oss/youdotcom-mcp-server/issues
+- GitHub Issues: https://github.com/youdotcom-oss/youdotcom-oss/mcp/issues
 - Email: support@you.com (for security issues)
 
 ### Suggesting Enhancements
@@ -68,8 +68,8 @@ We welcome feature requests! Please:
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/YOUR-USERNAME/youdotcom-mcp-server.git
-cd youdotcom-mcp-server
+git clone https://github.com/YOUR-USERNAME/youdotcom-oss/mcp.git
+cd youdotcom-oss/mcp
 git checkout -b feature/your-feature-name
 ```
 

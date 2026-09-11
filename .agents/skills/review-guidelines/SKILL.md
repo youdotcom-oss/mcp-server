@@ -34,7 +34,7 @@ Additional checks for this codebase:
 - `Bun.write()` over `writeFileSync()`
 - `Bun.$\`cmd\`` over `child_process.spawn()`
 - `import.meta.dir` over `process.cwd()`
-- Run commands from repo root with `bun --cwd packages/<name>` — never `cd` into packages
+- Run commands from the repo root
 
 ## Security
 

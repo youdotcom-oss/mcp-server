@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.9/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -57,14 +57,7 @@
   },
   "overrides": [
     {
-      "includes": [
-        "packages/**/*.spec.ts",
-        "packages/**/*.test.ts",
-        "packages/**/tests/**/*.ts",
-        "src/tests/**/*.ts",
-        "*.spec.ts",
-        "*.test.ts"
-      ],
+      "includes": ["src/**/*.spec.ts", "src/**/*.test.ts", "src/tests/**/*.ts", "*.spec.ts", "*.test.ts"],
       "linter": {
         "rules": {
           "suspicious": {

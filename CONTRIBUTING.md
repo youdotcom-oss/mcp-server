@@ -24,8 +24,8 @@ This project adheres to professional open-source standards. Be respectful, const
 ### Quick Setup
 
 ```bash
-git clone https://github.com/youdotcom-oss/youdotcom-mcp-server.git
-cd youdotcom-mcp-server
+git clone https://github.com/youdotcom-oss/mcp.git
+cd mcp
 bun install
 echo "export YDC_API_KEY=your-key" > .env
 source .env
@@ -38,7 +38,7 @@ For detailed development setup, code patterns, and architecture, see [AGENTS.md]
 
 ### Reporting Bugs
 
-**Before submitting**: Check [existing issues](https://github.com/youdotcom-oss/youdotcom-mcp-server/issues)
+**Before submitting**: Check [existing issues](https://github.com/youdotcom-oss/mcp/issues)
 
 **When reporting**, include:
 
@@ -50,7 +50,7 @@ For detailed development setup, code patterns, and architecture, see [AGENTS.md]
 
 **Where to report**:
 
-- GitHub Issues: https://github.com/youdotcom-oss/youdotcom-mcp-server/issues
+- GitHub Issues: https://github.com/youdotcom-oss/mcp/issues
 - Email: support@you.com (for security issues)
 
 ### Suggesting Enhancements
@@ -68,8 +68,8 @@ We welcome feature requests! Please:
 
 ```bash
 # Fork the repo on GitHub, then:
-git clone https://github.com/YOUR-USERNAME/youdotcom-mcp-server.git
-cd youdotcom-mcp-server
+git clone https://github.com/YOUR-USERNAME/mcp.git
+cd mcp
 git checkout -b feature/your-feature-name
 ```
 
@@ -127,13 +127,13 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 **Scopes** (optional):
 
-- `search`, `express`, `contents`, `shared`, `http`, `stdio`
+- `stdio`, `tests`
 
 **Examples**:
 
 ```bash
-git commit -m "feat(search): add freshness filter support"
-git commit -m "fix(express): handle timeout errors gracefully"
+git commit -m "feat(stdio): add freshness filter support"
+git commit -m "fix(stdio): handle timeout errors gracefully"
 git commit -m "docs: update API examples in README"
 ```
 
@@ -188,11 +188,13 @@ Pre-commit hooks run automatically:
 
 ### Local Testing
 
-Test with MCP Inspector:
+Run the stdio bridge locally:
 
 ```bash
-bun run inspect
+bun run dev
 ```
+
+Then connect your MCP client to the spawned process.
 
 ### Architecture
 
@@ -204,7 +206,6 @@ For codebase architecture, patterns, and technical details, see [AGENTS.md](./AG
 
 - **Users**: [README.md](./README.md)
 - **Developers**: [AGENTS.md](./AGENTS.md)
-- **API Reference**: [API.md](./docs/API.md)
 - **You.com Docs**: https://documentation.you.com
 
 ### Support Channels

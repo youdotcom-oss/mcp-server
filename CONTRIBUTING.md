@@ -127,13 +127,13 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 **Scopes** (optional):
 
-- `search`, `express`, `contents`, `shared`, `http`, `stdio`
+- `stdio`, `tests`
 
 **Examples**:
 
 ```bash
-git commit -m "feat(search): add freshness filter support"
-git commit -m "fix(express): handle timeout errors gracefully"
+git commit -m "feat(stdio): add freshness filter support"
+git commit -m "fix(stdio): handle timeout errors gracefully"
 git commit -m "docs: update API examples in README"
 ```
 
@@ -188,11 +188,13 @@ Pre-commit hooks run automatically:
 
 ### Local Testing
 
-Test with MCP Inspector:
+Run the stdio bridge locally:
 
 ```bash
-bun run inspect
+bun run dev
 ```
+
+Then connect your MCP client to the spawned process.
 
 ### Architecture
 
@@ -204,7 +206,6 @@ For codebase architecture, patterns, and technical details, see [AGENTS.md](./AG
 
 - **Users**: [README.md](./README.md)
 - **Developers**: [AGENTS.md](./AGENTS.md)
-- **API Reference**: [API.md](./docs/API.md)
 - **You.com Docs**: https://documentation.you.com
 
 ### Support Channels

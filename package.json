@@ -64,6 +64,5 @@
     "*.{json,md}": [
       "biome format --write --no-errors-on-unmatched"
     ]
-  },
-  "prepare": "git config core.hooksPath .hooks"
+  }
 }
